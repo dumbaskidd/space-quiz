@@ -527,13 +527,32 @@
 
     let currentQuestion = 0;
     let score = 0;
+    let missionQuestions = [];
+
+    function shuffleQuestions() {
+      missionQuestions = [...questions];
+      for (let index = missionQuestions.length - 1; index > 0; index--) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [missionQuestions[index], missionQuestions[randomIndex]] = [missionQuestions[randomIndex], missionQuestions[index]];
+      }
+    }
+
+    function startMission() {
+      currentQuestion = 0;
+      score = 0;
+      shuffleQuestions();
+      startScreen.classList.add("hidden");
+      resultsScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      showQuestion();
+    }
 
     function showQuestion() {
-      const item = questions[currentQuestion];
-      questionCount.textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+      const item = missionQuestions[currentQuestion];
+      questionCount.textContent = `Pregunta ${currentQuestion + 1} de ${missionQuestions.length}`;
       questionText.textContent = item.question;
       scoreText.textContent = score;
-      progressBar.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+      progressBar.style.width = `${((currentQuestion + 1) / missionQuestions.length) * 100}%`;
       progress.setAttribute("aria-valuenow", currentQuestion + 1);
       answers.innerHTML = "";
       feedback.textContent = "";
@@ -551,7 +570,7 @@
     }
 
     function selectAnswer(selectedButton, selectedIndex) {
-      const item = questions[currentQuestion];
+      const item = missionQuestions[currentQuestion];
       const allAnswers = [...answers.querySelectorAll(".answer")];
       allAnswers.forEach((button) => { button.disabled = true; });
       if (selectedIndex === item.answer) {
@@ -566,7 +585,7 @@
         feedback.className = "feedback incorrect";
       }
       scoreText.textContent = score;
-      nextButton.textContent = currentQuestion === questions.length - 1 ? "Ver resultados" : "Siguiente pregunta";
+      nextButton.textContent = currentQuestion === missionQuestions.length - 1 ? "Ver resultados" : "Siguiente pregunta";
       nextButton.classList.remove("hidden");
     }
 
@@ -594,29 +613,17 @@
       }
     }
 
-    document.querySelector("#start-button").addEventListener("click", () => {
-      startScreen.classList.add("hidden");
-      quizScreen.classList.remove("hidden");
-      currentQuestion = 0;
-      score = 0;
-      showQuestion();
-    });
+    document.querySelector("#start-button").addEventListener("click", startMission);
 
     nextButton.addEventListener("click", () => {
-      if (currentQuestion === questions.length - 1) showResults();
+      if (currentQuestion === missionQuestions.length - 1) showResults();
       else {
         currentQuestion++;
         showQuestion();
       }
     });
 
-    document.querySelector("#restart-button").addEventListener("click", () => {
-      resultsScreen.classList.add("hidden");
-      quizScreen.classList.remove("hidden");
-      currentQuestion = 0;
-      score = 0;
-      showQuestion();
-    });
+    document.querySelector("#restart-button").addEventListener("click", startMission);
   </script>
 </body>
 </html>
