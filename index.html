@@ -394,6 +394,28 @@
       letter-spacing: -.06em;
     }
 
+    .personal-best {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 7px;
+      margin: 0 0 20px;
+      padding: 8px 12px;
+      border: 1px solid var(--control-line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--control-bg);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .personal-best strong {
+      color: var(--accent);
+      font-size: 16px;
+      letter-spacing: -.02em;
+    }
+
     .hidden { display: none; }
 
     @keyframes shake {
@@ -490,6 +512,7 @@
       <h2 id="result-title">¡Excelente vuelo!</h2>
       <p class="summary" id="result-summary"></p>
       <div class="final-score"><span id="final-score">0</span>/10</div>
+      <p class="personal-best" aria-live="polite">Récord personal: <strong id="personal-best">Sin récord</strong></p>
       <p class="summary">Tu curiosidad es la mejor herramienta para explorar el universo.</p>
       <button class="restart" id="restart-button" type="button">Repetir misión</button>
     </section>
@@ -519,14 +542,23 @@
     const resultTitle = document.querySelector("#result-title");
     const resultSummary = document.querySelector("#result-summary");
     const resultEmoji = document.querySelector("#result-emoji");
+    const personalBestText = document.querySelector("#personal-best");
     const answers = document.querySelector("#answers");
     const feedback = document.querySelector("#feedback");
     const nextButton = document.querySelector("#next-button");
     const progressBar = document.querySelector("#progress-bar");
     const progress = document.querySelector(".progress");
+    const personalBestStorageKey = "space-quiz-personal-best";
 
     let currentQuestion = 0;
     let score = 0;
+
+    function getPersonalBest() {
+      const savedScore = Number.parseInt(localStorage.getItem(personalBestStorageKey), 10);
+      return Number.isInteger(savedScore) && savedScore >= 0 && savedScore <= questions.length
+        ? savedScore
+        : null;
+    }
 
     function showQuestion() {
       const item = questions[currentQuestion];
@@ -575,6 +607,12 @@
       resultsScreen.classList.remove("hidden");
       resultsScreen.classList.toggle("celebration", score >= 8);
       finalScore.textContent = score;
+      const previousBest = getPersonalBest();
+      const personalBest = previousBest === null || score > previousBest ? score : previousBest;
+      if (previousBest === null || score > previousBest) {
+        localStorage.setItem(personalBestStorageKey, String(personalBest));
+      }
+      personalBestText.textContent = `${personalBest}/${questions.length}`;
       if (score === 10) {
         resultEmoji.textContent = "🌟";
         resultTitle.textContent = "¡Comandante estelar!";
